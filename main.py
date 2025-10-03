@@ -3,6 +3,14 @@ from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 
+@app.get("/saludo/{nombre}")
+def saludo(nombre: str):
+    """
+    Este endpoint recibe un nombre como parámetro en la URL
+    y devuelve un saludo en formato JSON.
+    """
+    return {"mensaje": f"Hola, {nombre}. Soy Javier Gabriel López Acosta - 22031006"}
+
 @app.get("/", response_class=HTMLResponse)
 def hola():
     return """
