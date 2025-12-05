@@ -5,7 +5,7 @@ from api.database import SessionLocal
 import api.auth as auth, api.crud as crud
 from api.schemas import Token
 from fastapi import Depends
-from auth import get_current_user
+from api.auth import get_current_user
 
 app = FastAPI()
 
