@@ -26,11 +26,5 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
 
 # DATOS GENERALES DEL USUARIO
 @app.get("/usuario/me")
-def get_profile(token: str = Depends(auth.jwt), db: Session = Depends(get_db)):
-    user_id = int(auth.jwt.get_sub(token))
-
-    data = crud.get_user_data(db, user_id)
-    if not data:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-
-    return data
+def read_users_me(current_user: dict = Depends(get_current_user)):
+    return current_user
