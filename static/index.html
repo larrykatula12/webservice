@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Escolar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            padding: 20px;
+        }
+
+        /* Login Styles */
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard-header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info h2 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .user-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #ee5a6f;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .data-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tbody tr:hover {
+            background: #e9ecef;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginView" class="login-container">
+            <div class="login-header">
+                <h1>🎓 Sistema Escolar</h1>
+                <p>Inicia sesión para continuar</p>
+            </div>
+            <div id="errorMessage" class="error-message"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn" id="loginBtn">Iniciar Sesión</button>
+            </form>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboardView" class="dashboard">
+            <div class="dashboard-header">
+                <div class="user-info">
+                    <h2 id="welcomeMessage">Bienvenido</h2>
+                    <span class="user-badge" id="userRole"></span>
+                </div>
+                <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
+            </div>
+
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon">👨‍🎓</div>
+                    <div class="stat-value" id="totalAlumnos">0</div>
+                    <div class="stat-label">Alumnos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👨‍🏫</div>
+                    <div class="stat-value" id="totalMaestros">0</div>
+                    <div class="stat-label">Maestros</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="totalGrupos">0</div>
+                    <div class="stat-label">Grupos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-value" id="totalMaterias">0</div>
+                    <div class="stat-label">Materias</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏫</div>
+                    <div class="stat-value" id="totalAulas">0</div>
+                    <div class="stat-label">Aulas</div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="alumnos">Alumnos</button>
+                <button class="tab-btn" data-tab="maestros">Maestros</button>
+                <button class="tab-btn" data-tab="grupos">Grupos</button>
+            </div>
+
+            <div id="alumnos" class="tab-content active">
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre Completo</th>
+                                <th>Fecha Nacimiento</th>
+                                <th>Teléfono</th>
+                                <th>Dirección</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alumnosTable">
+                            <tr><td colspan="5" class="loading">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="maestros" class="tab-content">
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre Completo</th>
+                                <th>Especialidad</th>
+                                <th>Correo</th>
+                                <th>Teléfono</th>
+                            </tr>
+                        </thead>
+                        <tbody id="maestrosTable">
+                            <tr><td colspan="5" class="loading">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="grupos" class="tab-content">
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Grado</th>
+                                <th>Letra</th>
+                                <th>Turno</th>
+                                <th>Cupo Máximo</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gruposTable">
+                            <tr><td colspan="6" class="loading">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de la API
+        const API_URL = 'https://tu-backend.onrender.com'; // Cambiar por tu URL de Render
+        
+        let token = localStorage.getItem('token');
+        let currentUser = null;
+
+        // Verificar si hay sesión activa al cargar
+        if (token) {
+            verifyToken();
+        }
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Iniciando...';
+            errorMessage.style.display = 'none';
+            
+            try {
+                const formData = new URLSearchParams();
+                formData.append('username', username);
+                formData.append('password', password);
+                
+                const response = await fetch(`${API_URL}/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Usuario o contraseña incorrectos');
+                }
+                
+                const data = await response.json();
+                token = data.access_token;
+                currentUser = data.user_info;
+                
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(currentUser));
+                
+                showDashboard();
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Iniciar Sesión';
+            }
+        });
+
+        // Verificar token
+        async function verifyToken() {
+            try {
+                const response = await fetch(`${API_URL}/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    currentUser = await response.json();
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    showDashboard();
+                } else {
+                    logout();
+                }
+            } catch (error) {
+                logout();
+            }
+        }
+
+        // Mostrar dashboard
+        function showDashboard() {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('dashboardView').style.display = 'block';
+            
+            document.getElementById('welcomeMessage').textContent = 
+                `Bienvenido, ${currentUser.nombre_usuario}`;
+            document.getElementById('userRole').textContent = currentUser.rol_nombre;
+            
+            loadDashboardData();
+        }
+
+        // Cargar datos del dashboard
+        async function loadDashboardData() {
+            await loadStats();
+            await loadAlumnos();
+            await loadMaestros();
+            await loadGrupos();
+        }
+
+        // Cargar estadísticas
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}/dashboard/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const stats = await response.json();
+                
+                document.getElementById('totalAlumnos').textContent = stats.total_alumnos;
+                document.getElementById('totalMaestros').textContent = stats.total_maestros;
+                document.getElementById('totalGrupos').textContent = stats.total_grupos;
+                document.getElementById('totalMaterias').textContent = stats.total_materias;
+                document.getElementById('totalAulas').textContent = stats.total_aulas;
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+            }
+        }
+
+        // Cargar alumnos
+        async function loadAlumnos() {
+            try {
+                const response = await fetch(`${API_URL}/alumnos`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const alumnos = await response.json();
+                const tbody = document.getElementById('alumnosTable');
+                
+                if (alumnos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No hay alumnos registrados</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = alumnos.map(alumno => `
+                    <tr>
+                        <td>${alumno.id}</td>
+                        <td>${alumno.nombre} ${alumno.apellido_paterno} ${alumno.apellido_materno || ''}</td>
+                        <td>${alumno.fecha_nacimiento || 'N/A'}</td>
+                        <td>${alumno.telefono || 'N/A'}</td>
+                        <td>${alumno.direccion || 'N/A'}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error al cargar alumnos:', error);
+            }
+        }
+
+        // Cargar maestros
+        async function loadMaestros() {
+            try {
+                const response = await fetch(`${API_URL}/maestros`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const maestros = await response.json();
+                const tbody = document.getElementById('maestrosTable');
+                
+                if (maestros.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No hay maestros registrados</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = maestros.map(maestro => `
+                    <tr>
+                        <td>${maestro.id}</td>
+                        <td>${maestro.nombre} ${maestro.apellido_paterno} ${maestro.apellido_materno || ''}</td>
+                        <td>${maestro.especialidad || 'N/A'}</td>
+                        <td>${maestro.correo || 'N/A'}</td>
+                        <td>${maestro.telefono || 'N/A'}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error al cargar maestros:', error);
+            }
+        }
+
+        // Cargar grupos
+        async function loadGrupos() {
+            try {
+                const response = await fetch(`${API_URL}/grupos`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const grupos = await response.json();
+                const tbody = document.getElementById('gruposTable');
+                
+                if (grupos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No hay grupos registrados</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = grupos.map(grupo => `
+                    <tr>
+                        <td>${grupo.id}</td>
+                        <td>${grupo.grado}°</td>
+                        <td>${grupo.letra}</td>
+                        <td>${grupo.turno}</td>
+                        <td>${grupo.cupo_maximo}</td>
+                        <td><span style="color: ${grupo.activo ? 'green' : 'red'}">${grupo.activo ? 'Activo' : 'Inactivo'}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error al cargar grupos:', error);
+            }
+        }
+
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+                
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+            });
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            token = null;
+            currentUser = null;
+            
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('loginView').style.display = 'block';
+            document.getElementById('loginForm').reset();
+        }
+    </script>
+</body>
+</html>
