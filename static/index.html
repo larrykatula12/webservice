@@ -26,7 +26,6 @@
             padding: 20px;
         }
 
-        /* Login Styles */
         .login-container {
             background: white;
             padding: 40px;
@@ -103,7 +102,6 @@
             display: none;
         }
 
-        /* Dashboard Styles */
         .dashboard {
             display: none;
         }
@@ -282,12 +280,16 @@
             th, td {
                 padding: 10px 5px;
             }
+
+            .dashboard-header {
+                flex-direction: column;
+                gap: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Login Form -->
         <div id="loginView" class="login-container">
             <div class="login-header">
                 <h1>🎓 Sistema Escolar</h1>
@@ -307,7 +309,6 @@
             </form>
         </div>
 
-        <!-- Dashboard -->
         <div id="dashboardView" class="dashboard">
             <div class="dashboard-header">
                 <div class="user-info">
@@ -412,18 +413,16 @@
     </div>
 
     <script>
-        // Configuración de la API
-        const API_URL = 'https://tu-backend.onrender.com'; // Cambiar por tu URL de Render
+        // API URL - usa rutas relativas ya que el frontend y backend están en el mismo dominio
+        const API_URL = window.location.origin + '/api';
         
         let token = localStorage.getItem('token');
         let currentUser = null;
 
-        // Verificar si hay sesión activa al cargar
         if (token) {
             verifyToken();
         }
 
-        // Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -470,7 +469,6 @@
             }
         });
 
-        // Verificar token
         async function verifyToken() {
             try {
                 const response = await fetch(`${API_URL}/me`, {
@@ -491,7 +489,6 @@
             }
         }
 
-        // Mostrar dashboard
         function showDashboard() {
             document.getElementById('loginView').style.display = 'none';
             document.getElementById('dashboardView').style.display = 'block';
@@ -503,7 +500,6 @@
             loadDashboardData();
         }
 
-        // Cargar datos del dashboard
         async function loadDashboardData() {
             await loadStats();
             await loadAlumnos();
@@ -511,7 +507,6 @@
             await loadGrupos();
         }
 
-        // Cargar estadísticas
         async function loadStats() {
             try {
                 const response = await fetch(`${API_URL}/dashboard/stats`, {
@@ -532,7 +527,6 @@
             }
         }
 
-        // Cargar alumnos
         async function loadAlumnos() {
             try {
                 const response = await fetch(`${API_URL}/alumnos`, {
@@ -563,7 +557,6 @@
             }
         }
 
-        // Cargar maestros
         async function loadMaestros() {
             try {
                 const response = await fetch(`${API_URL}/maestros`, {
@@ -594,7 +587,6 @@
             }
         }
 
-        // Cargar grupos
         async function loadGrupos() {
             try {
                 const response = await fetch(`${API_URL}/grupos`, {
@@ -626,7 +618,6 @@
             }
         }
 
-        // Tabs
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const tabName = btn.dataset.tab;
@@ -639,7 +630,6 @@
             });
         });
 
-        // Logout
         document.getElementById('logoutBtn').addEventListener('click', logout);
 
         function logout() {
