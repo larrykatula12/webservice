@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timedelta
@@ -8,7 +10,6 @@ import pyodbc
 import os
 from passlib.context import CryptContext
 import jwt
-
 # Configuración
 SECRET_KEY = os.getenv("SECRET_KEY", "tu-secret-key-super-segura-cambiar-en-produccion")
 ALGORITHM = "HS256"
@@ -33,7 +34,7 @@ app.add_middleware(
 
 # Seguridad
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
 
 # Modelos Pydantic
 class Token(BaseModel):
@@ -123,18 +124,17 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except jwt.PyJWTError:
         raise credentials_exception
 
-# Endpoints
-@app.get("/")
-def read_root():
+# API Endpoints
+@app.get("/api/health")
+def health_check():
     return {"message": "API Sistema Escolar", "status": "active"}
 
-@app.post("/token", response_model=Token)
+@app.post("/api/token", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     conn = get_db_connection()
     cursor = conn.cursor()
     
     try:
-        # Buscar usuario
         cursor.execute("""
             SELECT u.id, u.nombre_usuario, u.contraseña, u.correo, u.rol_id, u.activo, r.nombre as rol_nombre
             FROM Usuarios u
@@ -150,14 +150,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
                 detail="Usuario o contraseña incorrectos"
             )
         
-        # Verificar contraseña
         if not verify_password(form_data.password, user.contraseña):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Usuario o contraseña incorrectos"
             )
         
-        # Crear token
         access_token = create_access_token(data={"sub": user.nombre_usuario})
         
         user_info = {
@@ -178,7 +176,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         cursor.close()
         conn.close()
 
-@app.get("/me", response_model=UserInfo)
+@app.get("/api/me", response_model=UserInfo)
 async def get_me(current_user: str = Depends(get_current_user)):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -208,29 +206,24 @@ async def get_me(current_user: str = Depends(get_current_user)):
         cursor.close()
         conn.close()
 
-@app.get("/dashboard/stats", response_model=DashboardStats)
+@app.get("/api/dashboard/stats", response_model=DashboardStats)
 async def get_dashboard_stats(current_user: str = Depends(get_current_user)):
     conn = get_db_connection()
     cursor = conn.cursor()
     
     try:
-        # Total alumnos
         cursor.execute("SELECT COUNT(*) FROM Alumnos")
         total_alumnos = cursor.fetchone()[0]
         
-        # Total maestros
         cursor.execute("SELECT COUNT(*) FROM Maestros")
         total_maestros = cursor.fetchone()[0]
         
-        # Total grupos activos
         cursor.execute("SELECT COUNT(*) FROM grupos WHERE activo = 1")
         total_grupos = cursor.fetchone()[0]
         
-        # Total materias activas
         cursor.execute("SELECT COUNT(*) FROM Materias WHERE Estado = 1")
         total_materias = cursor.fetchone()[0]
         
-        # Total aulas activas
         cursor.execute("SELECT COUNT(*) FROM Aulas WHERE Estado = 1")
         total_aulas = cursor.fetchone()[0]
         
@@ -246,7 +239,7 @@ async def get_dashboard_stats(current_user: str = Depends(get_current_user)):
         cursor.close()
         conn.close()
 
-@app.get("/alumnos", response_model=List[Alumno])
+@app.get("/api/alumnos", response_model=List[Alumno])
 async def get_alumnos(current_user: str = Depends(get_current_user), limit: int = 50):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -277,7 +270,7 @@ async def get_alumnos(current_user: str = Depends(get_current_user), limit: int 
         cursor.close()
         conn.close()
 
-@app.get("/maestros", response_model=List[Maestro])
+@app.get("/api/maestros", response_model=List[Maestro])
 async def get_maestros(current_user: str = Depends(get_current_user)):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -308,7 +301,7 @@ async def get_maestros(current_user: str = Depends(get_current_user)):
         cursor.close()
         conn.close()
 
-@app.get("/grupos", response_model=List[Grupo])
+@app.get("/api/grupos", response_model=List[Grupo])
 async def get_grupos(current_user: str = Depends(get_current_user)):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -337,6 +330,18 @@ async def get_grupos(current_user: str = Depends(get_current_user)):
     finally:
         cursor.close()
         conn.close()
+
+# Servir archivos estáticos (Frontend)
+# Si existe la carpeta static, la sirve
+if os.path.exists("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Ruta raíz sirve el index.html
+@app.get("/")
+async def read_root():
+    if os.path.exists("static/index.html"):
+        return FileResponse("static/index.html")
+    return {"message": "API Sistema Escolar - Frontend no encontrado", "status": "active"}
 
 if __name__ == "__main__":
     import uvicorn
