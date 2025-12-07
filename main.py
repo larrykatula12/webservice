@@ -10,6 +10,7 @@ import pyodbc
 import os
 from passlib.context import CryptContext
 import jwt
+
 # Configuración
 SECRET_KEY = os.getenv("SECRET_KEY", "tu-secret-key-super-segura-cambiar-en-produccion")
 ALGORITHM = "HS256"
